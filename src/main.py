@@ -15,6 +15,8 @@ if __name__=='__main__':
     model = str(rospy.get_param(node + "model"))
     data = str(rospy.get_param(node + "data"))
     epochs = int(rospy.get_param(node + "epochs"))
+    patience = int(rospy.get_param(node + "patience"))
+    batch = int(rospy.get_param(node + "batch"))
     imgsz = int(rospy.get_param(node + "imgsz"))
 
     train = bool(rospy.get_param(node + "train"))
@@ -26,7 +28,7 @@ if __name__=='__main__':
     yolov8_ros = YoloV8(model)
 
     if train:
-        yolov8_ros.train(data, epochs, imgsz, load_model)
+        yolov8_ros.train(data, epochs, patience, batch, imgsz, load_model)
 
 
     

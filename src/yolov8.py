@@ -11,14 +11,16 @@ class YoloV8(YOLO):
         """
         YOLO.__init__(self, model)
 
-    def train(self, data : str, epochs : int, imgsz : int, load_model : str = '' ) -> bool:
+    def train(self, data : str, epochs : int, patience: int, batch : int, imgsz : int, load_model : str = '' ) -> bool:
         """
         Initialize super class YOLO with a model
         
         Params:
-        data          -- File in coco format to start the training
-        epochs        -- Number of epochs to run the training 
-        imgsz         -- Size of images, using nxn
+        data          -- path to data file, i.e. coco128.yaml
+        epochs        -- number of epochs to train for
+        patience      -- epochs to wait for no observable improvement for early stopping of training
+        batch         -- number of images per batch (-1 for AutoBatch)
+        imgsz         -- size of input images as integer or w,h
         load_model    -- Model to load if you'll use transferlearning
 
         Return:
@@ -27,7 +29,7 @@ class YoloV8(YOLO):
         if load_model:
             self.load(load_model)
 
-        super().train(data=data, epochs=epochs, imgsz=imgsz)
+        super().train(data=data, patience=patience, batch= batch, epochs=epochs, imgsz=imgsz)
         return True
     
 

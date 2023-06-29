@@ -5,6 +5,8 @@
   <arg name="model" default="yolov8n.yaml"/>
   <arg name="data" default="coco128.yaml"/>
   <arg name="epochs" default="100"/>
+  <arg name="patience" default="50"/>
+  <arg name="batch" default="16"/>
   <arg name="imgsz" default="640"/>
 
   <arg name="train" default="False"/>
@@ -15,6 +17,8 @@
     <param name="model" value="$(arg model)"/>
     <param name="data" value="$(arg data)"/>
     <param name="epochs" value="$(arg epochs)"/>
+    <param name="patience" value="$(arg patience)"/>
+    <param name="batch" value="$(arg batch)"/>
     <param name="imgsz" value="$(arg imgsz)"/>
     <param name="train" value="$(arg train)"/>
     <param name="inference" value="$(arg inference)"/>
