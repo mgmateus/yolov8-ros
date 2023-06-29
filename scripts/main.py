@@ -17,7 +17,7 @@ if __name__=='__main__':
     batch = int(rospy.get_param(node + "batch"))
     imgsz = int(rospy.get_param(node + "imgsz"))
     save = bool(rospy.get_param(node + "save"))
-    save_period = int(rospy.get_param(node + "save_preiod"))
+    save_period = int(rospy.get_param(node + "save_period"))
     cache = bool(rospy.get_param(node + "cache"))
     device = None if rospy.get_param(node + "device") == 'None' else int(rospy.get_param(node + "device"))
     workers = int(rospy.get_param(node + "workers"))

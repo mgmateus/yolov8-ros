@@ -9,7 +9,7 @@
   <arg name="batch" default="16"/>
   <arg name="imgsz" default="640"/>
   <arg name="save" default="True"/>
-  <arg name="save_preiod" default="-1"/>
+  <arg name="save_period" default="-1"/>
   <arg name="cache" default="False"/>
   <arg name="device" default="0"/>
   <arg name="workers" default="8"/>
@@ -28,7 +28,7 @@
     <param name="batch" value="$(arg batch)"/>
     <param name="imgsz" value="$(arg imgsz)"/>
     <param name="save" value="$(arg save)"/>
-    <param name="save_preiod" value="$(arg save_preiod)"/>
+    <param name="save_period" value="$(arg save_period)"/>
     <param name="cache" value="$(arg cache)"/>
     <param name="device" value="$(arg device)"/>
     <param name="workers" value="$(arg workers)"/>
