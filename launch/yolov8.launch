@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <arg name="model" default="yolov8n.yaml"/>
+  <arg name="data" default="coco128.yaml"/>
+  <arg name="epochs" default="100"/>
+  <arg name="patience" default="50"/>
+  <arg name="batch" default="16"/>
+  <arg name="imgsz" default="640"/>
+  <arg name="save" default="True"/>
+  <arg name="save_preiod" default="-1"/>
+  <arg name="cache" default="False"/>
+  <arg name="device" default="0"/>
+
+  <arg name="train" default="False"/>
+  <arg name="inference" default="False"/>
+  <arg name="load_model" default=""/>
+
+  <node pkg="yolov8_ros" type="main.py" name="yolov8" output="screen" ns="yolov8">
+    <param name="model" value="$(arg model)"/>
+    <param name="data" value="$(arg data)"/>
+    <param name="epochs" value="$(arg epochs)"/>
+    <param name="patience" value="$(arg patience)"/>
+    <param name="batch" value="$(arg batch)"/>
+    <param name="imgsz" value="$(arg imgsz)"/>
+    <param name="save" value="$(arg save)"/>
+    <param name="save_preiod" value="$(arg save_preiod)"/>
+    <param name="cache" value="$(arg cache)"/>
+    <param name="device" value="$(arg device)"/>
+
+    <param name="train" value="$(arg train)"/>
+    <param name="inference" value="$(arg inference)"/>
+    <param name="load_model" value="$(arg load_model)"/>
+  </node>
+ 
+</launch>
