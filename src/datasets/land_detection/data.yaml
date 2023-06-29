@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['boat', 'drone', 'land_base', 'light_reflex']
+
+roboflow:
+  workspace: detection-tbmbp
+  project: land_pkgs
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/detection-tbmbp/land_pkgs/dataset/2
