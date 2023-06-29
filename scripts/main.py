@@ -20,6 +20,9 @@ if __name__=='__main__':
     save_period = int(rospy.get_param(node + "save_preiod"))
     cache = bool(rospy.get_param(node + "cache"))
     device = None if rospy.get_param(node + "device") == 'None' else int(rospy.get_param(node + "device"))
+    workers = int(rospy.get_param(node + "workers"))
+    project = None if rospy.get_param(node + "device") == 'None' else rospy.get_param(node + "project")
+    name = None if rospy.get_param(node + "device") == 'None' else rospy.get_param(node + "name")
 
     train = bool(rospy.get_param(node + "train"))
     inference = bool(rospy.get_param(node + "inference"))
@@ -28,7 +31,7 @@ if __name__=='__main__':
     
     if train:
         Detection.train(model=model, data=data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz,save=save, save_period=save_period,\
-                                cache=cache, device=device)
+                                cache=cache, device=device, workers=workers, project=project, name=name)
 
     
 

@@ -12,6 +12,9 @@
   <arg name="save_preiod" default="-1"/>
   <arg name="cache" default="False"/>
   <arg name="device" default="0"/>
+  <arg name="workers" default="8"/>
+  <arg name="project" default="None"/>
+  <arg name="name" default="None"/>
 
   <arg name="train" default="False"/>
   <arg name="inference" default="False"/>
@@ -28,6 +31,9 @@
     <param name="save_preiod" value="$(arg save_preiod)"/>
     <param name="cache" value="$(arg cache)"/>
     <param name="device" value="$(arg device)"/>
+    <param name="workers" value="$(arg workers)"/>
+    <param name="project" value="$(arg project)"/>
+    <param name="name" value="$(arg name)"/>
 
     <param name="train" value="$(arg train)"/>
     <param name="inference" value="$(arg inference)"/>

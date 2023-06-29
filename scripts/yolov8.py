@@ -3,9 +3,9 @@ import rospy
 
 from ultralytics.yolo.v8.detect import DetectionPredictor, DetectionTrainer, DetectionValidator
 
-DIR = os.path.dirname(os.path.realpath(__file__)).replace('scripts', 'src/ultralytics/ultralytics/datasets/')
+DATASETS = os.path.dirname(os.path.realpath(__file__)).replace('scripts', 'src/ultralytics/ultralytics/datasets/')
 
-class Detection:#(DetectionPredictor, DetectionTrainer, DetectionValidator):
+class Detection:
     
     @staticmethod
     def train(model : str,
@@ -18,6 +18,9 @@ class Detection:#(DetectionPredictor, DetectionTrainer, DetectionValidator):
               save_period : int,
               cache : bool,
               device : int,
+              workers : int,
+              project : str,
+              name : str,
               weights : str = '' ) -> bool:
         
         """
@@ -34,14 +37,20 @@ class Detection:#(DetectionPredictor, DetectionTrainer, DetectionValidator):
         save_period   -- Save checkpoint every x epochs (disabled if < 1)
         cache         -- True/ram, disk or False. Use cache for data loading
         device        -- device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu
-        load_model    -- Model to load if you'll use transferlearning
+        workers       -- number of worker threads for data loading (per RANK if DDP)
+        project       -- project name
+        name          -- experiment name 
+
+        weights    -- model to load if you'll use transferlearning
 
         Return:
         True
         """
-        rospy.logwarn(DIR+data)
-        args = dict(model=model, data=DIR+data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz, save=save, \
-                    save_period=save_period, cache=cache, device=device)
+        data= DATASETS + data
+        name= name or model.replace('yaml','pt')
+
+        args = dict(model=model, data=data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz, save=save, \
+                    save_period=save_period, cache=cache, device=device, workers=workers, project=project, name=name)
         
         trainer = DetectionTrainer(overrides=args)
         if weights:
