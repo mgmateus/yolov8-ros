@@ -60,7 +60,7 @@ class DetectionPublisher:
         """
         name= data.split('/')[0]
         data= DATASETS + data
-        project = DETECTION + name
+        project = DETECTION
         
 
         rospy.logwarn(f"data= {data}  name= {name}")
