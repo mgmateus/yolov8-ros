@@ -13,8 +13,8 @@
   <arg name="cache" default="False"/>
   <arg name="device" default="0"/>
   <arg name="workers" default="8"/>
-  <arg name="project" default="None"/>
-  <arg name="name" default="None"/>
+  <arg name="project" default=""/>
+  <arg name="name" default=""/>
 
   <arg name="train" default="False"/>
   <arg name="inference" default="False"/>

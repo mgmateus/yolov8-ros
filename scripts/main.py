@@ -21,8 +21,8 @@ if __name__=='__main__':
     cache = bool(rospy.get_param(node + "cache"))
     device = None if rospy.get_param(node + "device") == 'None' else int(rospy.get_param(node + "device"))
     workers = int(rospy.get_param(node + "workers"))
-    project = None if rospy.get_param(node + "device") == 'None' else rospy.get_param(node + "project")
-    name = None if rospy.get_param(node + "device") == 'None' else rospy.get_param(node + "name")
+    project = rospy.get_param(node + "project")
+    name = rospy.get_param(node + "name")
 
     train = bool(rospy.get_param(node + "train"))
     inference = bool(rospy.get_param(node + "inference"))
