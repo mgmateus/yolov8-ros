@@ -55,8 +55,9 @@ class DetectionPublisher:
         Return:
         True
         """
+        name= data.split('/')[0]
         data= DATASETS + data
-        name= name or model.replace('yaml','pt')
+        
 
         rospy.logwarn(f"data= {data}  name= {name}")
 
