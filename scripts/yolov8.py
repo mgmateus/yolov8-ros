@@ -12,7 +12,10 @@ from vision_msgs.msg import Detection2DArray
 
 from ultralytics.yolo.v8.detect import DetectionPredictor, DetectionTrainer, DetectionValidator
 
-DATASETS = os.path.dirname(os.path.realpath(__file__)).replace('scripts', 'src/ultralytics/ultralytics/datasets/')
+
+PATH = os.path.dirname(os.path.realpath(__file__))
+DATASETS = PATH.replace('scripts', 'src/ultralytics/ultralytics/datasets/')
+DETECTION = PATH.replace('scripts', 'src/ultralytics/ultralytics/yolo/v8/detect/')
 
 class DetectionPublisher:
     
@@ -57,6 +60,7 @@ class DetectionPublisher:
         """
         name= data.split('/')[0]
         data= DATASETS + data
+        project = DETECTION + name
         
 
         rospy.logwarn(f"data= {data}  name= {name}")
