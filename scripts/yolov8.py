@@ -1,11 +1,20 @@
 import os
 import rospy
+import cv2
+
+import numpy as np
+
+from numpy import ndarray
+from cv_bridge import CvBridge, CvBridgeError
+
+from sensor_msgs.msg import Image
+from vision_msgs.msg import Detection2DArray
 
 from ultralytics.yolo.v8.detect import DetectionPredictor, DetectionTrainer, DetectionValidator
 
 DATASETS = os.path.dirname(os.path.realpath(__file__)).replace('scripts', 'src/ultralytics/ultralytics/datasets/')
 
-class Detection:
+class DetectionPublisher:
     
     @staticmethod
     def train(model : str,
@@ -49,6 +58,8 @@ class Detection:
         data= DATASETS + data
         name= name or model.replace('yaml','pt')
 
+        rospy.logwarn(f"data= {data}  name= {name}")
+
         args = dict(model=model, data=data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz, save=save, \
                     save_period=save_period, cache=cache, device=device, workers=workers, project=project, name=name)
         
@@ -58,6 +69,68 @@ class Detection:
 
         trainer.train()
         return True
+    
+    @staticmethod
+    def ros_to_cv2(img_msg : Image) -> ndarray:
+        """
+        Convert a ros_msg in opencv format
+
+        Params:
+        img_msg     -- image in ros_msg format
+
+        Returns:
+        img_cv      -- image in opencv format
+        """
+        try:
+            img_cv = CvBridge().imgmsg_to_cv2(img_msg, "passthrough")
+            return img_cv
+
+        except CvBridgeError as e:
+            rospy.logerr("CvBridge Error: {0}".format(e))
+
+    
+    @staticmethod
+    def cv2_to_ros(img_msg : ndarray) -> Image:
+        """
+        Convert a opencv in ros_msg format
+
+        Params:
+        img_msg     -- image in opencv format
+
+        Returns:
+        img_cv      -- image in ros_msg format
+        """
+        try:
+            img_ros = CvBridge().cv2_to_imgmsg(img_msg, "passthrough")
+            return img_ros
+
+        except CvBridgeError as e:
+            rospy.logerr("CvBridge Error: {0}".format(e))
+
+    def __init__(self, cam_topic : str):
+        rospy.Subscriber(cam_topic, Image, self._call_cam)
+
+        self.__pub_inference_view = rospy.Publisher("yolov8/inference_view", Image, queue_size=10)
+        self.__pub_inference_result = rospy.Publisher("yolov8/inference_view", Detection2DArray, queue_size=10)
+
+        self.__detector = DetectionPredictor()
+    
+    def _call_cam(self, img_msg : Image) -> Image:
+
+        np_img_orig = self.ros_to_cv2(img_msg)
+        # handle possible different img formats
+        if len(np_img_orig.shape) == 2:
+            np_img_orig = np.stack([np_img_orig] * 3, axis=2)
+
+        h_orig, w_orig, c = np_img_orig.shape
+
+        # automatically resize the image to the next smaller possible size
+        w_scaled, h_scaled = self.img_size
+        np_img_resized = cv2.resize(np_img_orig, (w_scaled, h_scaled))
+        
+
+
+    
 
     
 
