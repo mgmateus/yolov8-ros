@@ -3,7 +3,7 @@
 import rospy
 import os
 
-from yolov8 import Detection
+from yolov8 import DetectionPublisher
 
 if __name__=='__main__':
     rospy.init_node("yolov8")
@@ -30,7 +30,7 @@ if __name__=='__main__':
 
     
     if train:
-        Detection.train(model=model, data=data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz,save=save, save_period=save_period,\
+        DetectionPublisher.train(model=model, data=data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz,save=save, save_period=save_period,\
                                 cache=cache, device=device, workers=workers, project=project, name=name)
 
     
