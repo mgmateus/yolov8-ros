@@ -1,10 +1,12 @@
 import os
 import rospy
 import cv2
+from src.ultralytics.ultralytics.yolo.engine.results import Results
 import torch
 import numpy as np
 
 from numpy import ndarray
+from typing import Tuple, Union, List
 from cv_bridge import CvBridge, CvBridgeError
 
 from sensor_msgs.msg import Image
@@ -35,24 +37,24 @@ class Detection:
                 name : str) -> bool:
         
         """
-        Initialize super DetectionTrainer and execute the train
+        Initialize super DetectionTrainer and execute the train\n
         
         Params:\n
-        model         -- path to model file, i.e. yolov8n.pt, yolov8n.yaml
-        data          -- path to data file, i.e. coco128.yaml
-        epochs        -- number of epochs to train for
-        patience      -- epochs to wait for no observable improvement for early stopping of training
-        batch         -- number of images per batch (-1 for AutoBatch)
-        imgsz         -- size of input images as integer or w,h
-        save          -- save train checkpoints and predict results
-        save_period   -- Save checkpoint every x epochs (disabled if < 1)
-        cache         -- True/ram, disk or False. Use cache for data loading
-        device        -- device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu
-        workers       -- number of worker threads for data loading (per RANK if DDP)
-        project       -- project name
-        name          -- experiment name 
+        model         -- path to model file, i.e. yolov8n.pt, yolov8n.yaml\n
+        data          -- path to data file, i.e. coco128.yaml\n
+        epochs        -- number of epochs to train for\n
+        patience      -- epochs to wait for no observable improvement for early stopping of training\n
+        batch         -- number of images per batch (-1 for AutoBatch)\n
+        imgsz         -- size of input images as integer or w,h\n
+        save          -- save train checkpoints and predict results\n
+        save_period   -- Save checkpoint every x epochs (disabled if < 1)\n
+        cache         -- True/ram, disk or False. Use cache for data loading\n
+        device        -- device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu\n
+        workers       -- number of worker threads for data loading (per RANK if DDP)\n
+        project       -- project name\n
+        name          -- experiment name \n
 
-        Return:
+        Return:\n
         
         """
         name= data.split('/')[0]
@@ -61,6 +63,9 @@ class Detection:
         self._args = dict(model=model, data=data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz, save=save, \
                     save_period=save_period, cache=cache, device=device, workers=workers, project=project, name=name)
         
+        self.__trainer = None
+        self.__predictor = None
+
     @property
     def args(self) -> dict:
         return self._args
@@ -68,98 +73,69 @@ class Detection:
     @args.setter
     def args(self, _args : dict):
           self.__set_args(_args)
+
     
-    def __set_args(self, args : dict):
+    def _set_args(self, args : dict):
         """
-        Change inital params to execute train, inference or validation
+        Change inital params to execute train, inference or validation\n
 
         Params: \n
-        args         -- arguments to be changed or added in inital params
+        args         -- arguments to be changed or added in inital params\n
 
-        Returns:
+        Returns:\n
 
         """
         for arg in args:
             self._args[arg] = args[arg]  
 
-    def train(self, model : str, data : str, weights : str, device : str = '0'):
+    def set_trainer(self, args : dict = None):
+        self.__trainer = DetectionTrainer(overrides=args) if args else DetectionTrainer(overrides=self._args)
+
+    def train(self, model : str, data : str, weights : str = '', device : str = '0'):
         """
         Executte the train
 
         Params: \n
-        model         -- path to model file, i.e. yolov8n.pt, yolov8n.yaml
-        data          -- path to data file, i.e. coco128.yaml
-        weights       -- model to load if you'll use transferlearning
-        device        -- device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu
+        model         -- path to model file, i.e. yolov8n.pt, yolov8n.yaml\n
+        data          -- path to data file, i.e. coco128.yaml\n
+        weights       -- model to load if you'll use transferlearning\n
+        device        -- device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu\n
 
-        Returns: 
+        Returns: \n
 
         """
         data = DATASETS + data
         device = int(device) if device != 'cpu' else device
-        self.__set_args(dict(model=model, data=data, device=device))
+        self._set_args(dict(model=model, data=data, device=device))
 
-        trainer = DetectionTrainer(overrides=self.args)
         if weights:
-            trainer.model = trainer.get_model(cfg=model, weights=weights)
+            self.__trainer.model = self.__trainer.get_model(cfg=model, weights=weights)
         
-        trainer.train()
+        self.__trainer.train()
+
+    def set_predictor(self, args : dict):
+        self._set_args(args)
+        self.__predictor = DetectionPredictor(overrides=self._args)
+
+
+
+    @torch.no_grad()
+    def _inference(self, img: torch.Tensor) -> List[Results]:
+        """
+        Executte de inference on input image\n
+
+        Params:\n
+        img         -- tensor [c, h, w]\n
+
+        Returns:\n
+        detections  -- tensor of shape [num_boxes, 6], where each item is represented as [x1, y1, x2, y2, confidence, class_id]\n
+        """
+        img = img.unsqueeze(0)
+        detections = self.__predictor.stream_inference(source=img, model=self._args['model'])
+        return detections
 
 
 class DetectionPublisher:
-    
-    @staticmethod
-    def train(model : str,
-              data : str, 
-              epochs : int, 
-              patience: int, 
-              batch : int, 
-              imgsz : int, 
-              save : bool, 
-              save_period : int,
-              cache : bool,
-              device : int,
-              workers : int,
-              project : str,
-              name : str,
-              weights : str = '' ) -> bool:
-        
-        """
-        Initialize super DetectionTrainer and execute the train
-        
-        Params:
-        model         -- path to model file, i.e. yolov8n.pt, yolov8n.yaml
-        data          -- path to data file, i.e. coco128.yaml
-        epochs        -- number of epochs to train for
-        patience      -- epochs to wait for no observable improvement for early stopping of training
-        batch         -- number of images per batch (-1 for AutoBatch)
-        imgsz         -- size of input images as integer or w,h
-        save          -- save train checkpoints and predict results
-        save_period   -- Save checkpoint every x epochs (disabled if < 1)
-        cache         -- True/ram, disk or False. Use cache for data loading
-        device        -- device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu
-        workers       -- number of worker threads for data loading (per RANK if DDP)
-        project       -- project name
-        name          -- experiment name 
-
-        weights    -- model to load if you'll use transferlearning
-
-        Return:
-        True
-        """
-        name= data.split('/')[0]
-        data= DATASETS + data
-        project = DETECTION
-
-        args = dict(model=model, data=data, epochs=epochs, patience=patience, batch=batch, imgsz=imgsz, save=save, \
-                    save_period=save_period, cache=cache, device=device, workers=workers, project=project, name=name)
-        
-        trainer = DetectionTrainer(overrides=args)
-        if weights:
-            trainer.model = trainer.get_model(cfg=model, weights=weights)
-
-        trainer.train()
-        return True
     
     @staticmethod
     def ros_to_cv2(img_msg : Image) -> ndarray:
@@ -206,21 +182,7 @@ class DetectionPublisher:
 
         self.__detector = DetectionPredictor()
 
-    @torch.no_grad()
-    def _inference(self, img: torch.Tensor) -> list:
-        """
-        :param img: tensor [c, h, w]
-        :returns: tensor of shape [num_boxes, 6], where each item is represented as
-            [x1, y1, x2, y2, confidence, class_id]
-        """
-        img = img.unsqueeze(0)
-        pred_results = self.model(img)[0]
-        detections = non_max_suppression(
-            pred_results, conf_thres=self.conf_thresh, iou_thres=self.iou_thresh
-        )
-        if detections:
-            detections = detections[0]
-        return detections
+    
     
     
     def _call_cam(self, img_msg : Image) -> Image:
